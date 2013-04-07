@@ -155,7 +155,7 @@
 
   ResumableUpload.prototype._cachedUrl = function(url) {
     var fingerPrint = 'file-' + this.file.name + '-' + this.file.size;
-console.log('url', url);
+
     if (url === false) {
       localStorage.removeItem(fingerPrint);
       return true;
