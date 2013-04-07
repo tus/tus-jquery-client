@@ -62,6 +62,7 @@
 
     // Optionally reset
     if (self.options.reset === true) {
+      console.log('Resetting any known cached url for ' + self.file.name);
       self._cachedUrl(false);
     }
 
@@ -147,7 +148,7 @@
 
     this.jqXHR = $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
-        self._emitFail(textStatus ? textStatus : errorThrown);
+        self._emitFail(textStatus + ' - ' + errorThrown);
         console.log('fail', arguments);
       })
       .done(function() {
