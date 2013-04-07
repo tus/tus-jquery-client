@@ -16,7 +16,9 @@
   var tus = window.tus = {
     upload: function(file, options) {
       var upload = new ResumableUpload(file, options);
-      upload._start();
+      if (file) {
+        upload._start();
+      }
       return upload;
     },
   };
@@ -47,17 +49,33 @@
     // @todo: fingerprint, use localstorage, don't do post if we can resume
     // if so, do a HEAD
     var self = this;
-    var options = {
-      type: 'POST',
-      url: self.options.endpoint,
-      headers: {
-        'Content-Range': 'bytes */' + self.file.size,
-        'Content-Disposition': 'attachment; filename="' + encodeURI(self.file.name) + '"'
-      }
-    };
 
-    self.bytesUploaded = 0;
+    var fingerPrint = self._fingerPrint(self.file);
+
+    self.url        = localStorage.getItem(fingerPrint);
     self.bytesTotal = self.file.size;
+
+    // To reset:
+    // localStorage.removeItem(fingerPrint);
+
+    if (self.url) {
+      console.log('Resuming known url ' + self.url);
+      // Resume against existing url
+      var options = {
+        type: 'HEAD',
+        url: self.url,
+      };
+    } else {
+      // New upload, get url
+      var options = {
+        type: 'POST',
+        url: self.options.endpoint,
+        headers: {
+          'Content-Range': 'bytes */' + self.bytesTotal,
+          'Content-Disposition': 'attachment; filename="' + encodeURI(self.file.name) + '"'
+        }
+      };
+    }
 
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
@@ -65,21 +83,23 @@
         self._deferred.reject(new Error('Could not create file resource: ' + textStatus), jqXHR, errorThrown);
       })
       .done(function(data, textStatus, jqXHR) {
-        self.url = jqXHR.getResponseHeader('Location');
         if (!self.url) {
-          self._deferred.reject(new Error('Could not get url for file resource: ' + textStatus));
-          return;
+          // On POST, save fingerPrint & url to local storage
+          if (!(self.url = jqXHR.getResponseHeader('Location'))) {
+            self._deferred.reject(new Error('Could not get url for file resource: ' + textStatus));
+            return;
+          }
+          console.log('Saving', fingerPrint, self.url);
+          localStorage.setItem(fingerPrint, self.url);
+          self.bytesUploaded = 0;
+        } else {
+          self.bytesUploaded = self._bytesUploaded(jqXHR.getResponseHeader('Range'));
         }
 
         // We now have a url, time to fire the progress event!
-        self._deferred.notifyWith(self);
+        self._deferred.notifyWith(self, [null, self.bytesUploaded, self.bytesTotal]);
 
-        // @todo: Don't start at 0 if we could resume. use the head to
-        // determine where to take off
-        var range_from = 0;
-        var range_to = self.file.size -1;
-
-        self._upload(range_from, range_to);
+        self._upload(self.bytesUploaded, self.bytesTotal - 1);
       });
   };
 
@@ -116,5 +136,26 @@
         console.log('done', arguments, self, self.url);
         self._deferred.resolveWith(self, [self.url]);
       });
+  };
+
+  // Parses the Range header from the server response
+  // and returns the uploaded bytes:
+  ResumableUpload.prototype._bytesUploaded = function (range) {
+    if (!range) {
+      return;
+    }
+
+    var parts = range.split('-');
+    if (parts.length < 2) {
+      return;
+    }
+
+    return parseInt(parts[1], 10) + 1;
+  },
+
+  // Uploads the file data to tus resource url created by _start()
+  ResumableUpload.prototype._fingerPrint = function(file) {
+    var fingerPrint = 'file-' + file.name + '-' + file.size;
+    return fingerPrint
   };
 })(jQuery);
