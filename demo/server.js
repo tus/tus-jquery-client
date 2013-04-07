@@ -15,3 +15,4 @@ http.createServer(function(req, res){
 }).listen(port);
 
 console.log('Demo running at http://localhost:' + port + '/');
+console.log('Make sure to run a tusd server at http://localhost:1080/ for this to work');
