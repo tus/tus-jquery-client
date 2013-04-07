@@ -84,7 +84,6 @@
       })
       .done(function(data, textStatus, jqXHR) {
         if (!self.url) {
-          // On POST, save fingerPrint & url to local storage
           if (!(self.url = jqXHR.getResponseHeader('Location'))) {
             self._deferred.reject(new Error('Could not get url for file resource: ' + textStatus));
             return;
@@ -96,13 +95,13 @@
           self.bytesUploaded = self._bytesUploaded(jqXHR.getResponseHeader('Range'));
 
           if (self.bytesUploaded === self.file.size) {
-            self._deferred.resolveWith(self, [self.url]);
+            self._emitDone();
             return;
           }
         }
 
         // We now have a url, time to fire the progress event!
-        self._deferred.notifyWith(self, [null, self.bytesUploaded, self.bytesTotal]);
+        self._emitProgress();
 
         self._upload(self.bytesUploaded, self.bytesTotal - 1);
       });
@@ -111,6 +110,7 @@
   // Uploads the file data to tus resource url created by _start()
   ResumableUpload.prototype._upload = function(range_from, range_to) {
     var self  = this;
+
     var slice = self.file.slice || self.file.webkitSlice || self.file.mozSlice;
     var blob  = slice.call(self.file, range_from, (range_to - range_from) + 1, self.file.type);
     var xhr   = $.ajaxSettings.xhr();
@@ -132,7 +132,7 @@
 
     $(xhr.upload).bind('progress', function(e) {
       self.bytesUploaded = e.originalEvent.loaded;
-      self._deferred.notifyWith(self, [e, self.bytesUploaded, self.bytesTotal]);
+      self._emitProgress(e);
     });
 
     var jqXHR = $.ajax(options)
@@ -141,7 +141,7 @@
       })
       .done(function() {
         console.log('done', arguments, self, self.url);
-        self._deferred.resolveWith(self, [self.url]);
+        self._emitDone();
       });
   };
 
@@ -159,6 +159,14 @@
 
     return parseInt(parts[1], 10) + 1;
   },
+
+  ResumableUpload.prototype._emitProgress = function(e) {
+    this._deferred.notifyWith(this, [e, this.bytesUploaded, this.bytesTotal]);
+  };
+
+  ResumableUpload.prototype._emitDone = function() {
+    this._deferred.resolveWith(this, [this.url]);
+  };
 
   ResumableUpload.prototype._cachedUrl = function(url) {
     var fingerPrint = 'file-' + this.file.name + '-' + this.file.size;
