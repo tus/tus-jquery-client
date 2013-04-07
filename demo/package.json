@@ -1,0 +1,16 @@
+{
+  "name": "tus-jquery-client-demo",
+  "version": "0.0.0",
+  "description": "A demo for the tus jquery client.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": "git://github.com/tus/tus-jquery-client.git",
+  "author": "Felix Geisendörfer <felix@transloadit.com>",
+  "license": "MIT",
+  "dependencies": {
+    "send": "~0.1.0"
+  }
+}
