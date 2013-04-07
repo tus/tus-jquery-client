@@ -1,18 +1,29 @@
-# tus-jquery
+# tus-jquery-client
 
-A file upload library for jQuery implementing the [tus resumable upload
+A jQuery client implementing the [tus resumable upload
 protocol](https://github.com/tus/tus-resumable-upload-protocol).
 
 This first version will provide a low level API without a GUI. More advanced
 features will follow.
 
-## API Draft
+## Example
+
+The code below outlines how the API could work.
 
 ```js
 $('input[type=file]').change(function() {
-  tus.upload(this, function() {
-  
-  });
+  var options = {url: 'http://localhost:1080/files'};
+  tus
+    .upload(this.files[0], options)
+    .fail(function(upload, error) {
+      console.log('upload failed', error);
+    })
+    .progress(function(upload) {
+      console.log(upload.bytesSent, upload.bytesTotal);
+    })
+    .done(function(upload) {
+      console.log(upload.url);
+    });
 });
 ```
 
