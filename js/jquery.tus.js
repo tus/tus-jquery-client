@@ -44,6 +44,8 @@
 
   // Creates a file resource at the configured tus endpoint and gets the url for it.
   ResumableUpload.prototype._start = function() {
+    // @todo: fingerprint, use localstorage, don't do post if we can resume
+    // if so, do a HEAD
     var self = this;
     var options = {
       type: 'POST',
@@ -71,7 +73,13 @@
 
         // We now have a url, time to fire the progress event!
         self._deferred.notifyWith(self);
-        self._upload(0, self.file.size -1);
+
+        // @todo: Don't start at 0 if we could resume. use the head to
+        // determine where to take off
+        var range_from = 0;
+        var range_to = self.file.size -1;
+
+        self._upload(range_from, range_to);
       });
   };
 
