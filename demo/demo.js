@@ -11,7 +11,8 @@ $(function() {
         console.log('upload failed', error);
       })
       .progress(function(e, bytesUploaded, bytesTotal) {
-        console.log(bytesUploaded, bytesTotal);
+        var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+        console.log(bytesUploaded, bytesTotal, percentage + '%');
       })
       .done(function(url) {
         var $download = $('<a>Download uploaded file</a>').appendTo($parent);
