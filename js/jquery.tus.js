@@ -146,7 +146,8 @@
     });
 
     this.jqXHR = $.ajax(options)
-      .fail(function() {
+      .fail(function(jqXHR, textStatus, errorThrown) {
+        self._emitFail(textStatus ? textStatus : errorThrown);
         console.log('fail', arguments);
       })
       .done(function() {
@@ -181,7 +182,11 @@
   };
 
   ResumableUpload.prototype._emitDone = function() {
-    this._deferred.resolveWith(this, [this.url]);
+    this._deferred.resolveWith(this, [this.url, this.file]);
+  };
+
+  ResumableUpload.prototype._emitFail = function(err) {
+    this._deferred.rejectWith(this, [err]);
   };
 
   ResumableUpload.prototype._cachedUrl = function(url) {
