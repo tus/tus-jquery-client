@@ -92,6 +92,11 @@
           self.bytesUploaded = 0;
         } else {
           self.bytesUploaded = self._bytesUploaded(jqXHR.getResponseHeader('Range'));
+
+          if (self.bytesUploaded === self.file.size) {
+            self._deferred.resolveWith(self, [self.url]);
+            return;
+          }
         }
 
         // We now have a url, time to fire the progress event!
