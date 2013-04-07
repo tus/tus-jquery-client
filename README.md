@@ -1,14 +1,11 @@
 # tus-html5-client
 
-The HTML5 client for tus.
+A HTML5/JavaScript library implementing the [tus resumable upload
+protocol](https://github.com/tus/tus-resumable-upload-protocol).
 
-## Roadmap
-
-* Build a proof of concept based on the [jQuery File Upload Plugin](https://github.com/blueimp/jQuery-File-Upload) (in progress)
-* Determine if jQuery File Upload should be used in the long run
-* Release a reliable, robust and documented HTML5 file uploader
+This first version will provide a low level API without a GUI. More advanced
+features will follow.
 
 ## License
 
-We are still trying to figure out what license to use. MIT or Apache seems most
-likely at this point.
+This project is licensed under the MIT license, see `LICENSE.txt`.
