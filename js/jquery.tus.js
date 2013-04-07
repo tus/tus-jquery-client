@@ -51,11 +51,9 @@
     self.url        = self._cachedUrl();
     self.bytesTotal = self.file.size;
 
-    // To reset:
-    // self._cachedUrl(false);
+    // To reset: self._cachedUrl(false);
 
     var options;
-
     if (self.url) {
       console.log('Resuming known url ' + self.url);
       // Resume against existing url
@@ -82,7 +80,6 @@
       })
       .done(function(data, textStatus, jqXHR) {
         if (!self.url) {
-          // On POST, save fingerPrint & url to local storage
           if (!(self.url = jqXHR.getResponseHeader('Location'))) {
             self._deferred.reject(new Error('Could not get url for file resource: ' + textStatus));
             return;
@@ -109,6 +106,7 @@
   // Uploads the file data to tus resource url created by _start()
   ResumableUpload.prototype._upload = function(range_from, range_to) {
     var self  = this;
+
     var slice = self.file.slice || self.file.webkitSlice || self.file.mozSlice;
     var blob  = slice.call(self.file, range_from, (range_to - range_from) + 1, self.file.type);
     var xhr   = $.ajaxSettings.xhr();
