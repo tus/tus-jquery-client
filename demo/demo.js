@@ -1,4 +1,10 @@
 $(function() {
+  $('.js-stop').click(function(e) {
+    e.preventDefault();
+
+    tus.stop();
+  });
+
   $('input[type=file]').change(function() {
     var $parent = $(this).parent();
     var file = this.files[0];

@@ -14,13 +14,20 @@
 
   // The Public API
   var tus = window.tus = {
+    currentUpload: null,
+
     upload: function(file, options) {
-      var upload = new ResumableUpload(file, options);
+      this.currentUpload = new ResumableUpload(file, options);
       if (file) {
-        upload._start();
+        this.currentUpload._start();
       }
-      return upload;
+      return this.currentUpload;
     },
+    stop: function(upload) {
+      if (this.currentUpload) {
+        this.currentUpload._stop();
+      }
+    }
   };
 
   function ResumableUpload(file, options) {
@@ -39,6 +46,9 @@
     this.bytesUploaded = null;
     // Total amount of bytes to send
     this.bytesTotal = null;
+
+    // the jqXHR object
+    this.jqXHR = null;
 
     // Create a deferred and make our upload a promise object
     this._deferred = $.Deferred();
@@ -135,7 +145,7 @@
       self._emitProgress(e);
     });
 
-    var jqXHR = $.ajax(options)
+    this.jqXHR = $.ajax(options)
       .fail(function() {
         console.log('fail', arguments);
       })
@@ -143,6 +153,12 @@
         console.log('done', arguments, self, self.url);
         self._emitDone();
       });
+  };
+
+  ResumableUpload.prototype._stop = function() {
+    if (this.jqXHR) {
+      this.jqXHR.abort();
+    }
   };
 
   // Parses the Range header from the server response
