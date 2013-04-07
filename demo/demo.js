@@ -15,7 +15,8 @@ $(function() {
 
     var options = {
       endpoint: 'http://localhost:1080/files',
-      reset: $('#reset').prop('checked')
+      reset: $('#reset').prop('checked'),
+      reset_when_complete: true
     };
 
     tus
@@ -23,7 +24,7 @@ $(function() {
       .fail(function(error) {
         alert('Failed because: ' + error);
       })
-      .always(function(error) {
+      .always(function() {
         $input.val('');
         $('.js-stop').addClass('disabled');
       })
@@ -32,7 +33,7 @@ $(function() {
         console.log(bytesUploaded, bytesTotal, percentage + '%');
       })
       .done(function(url, file) {
-        var $download = $('<a>Download ' + file.name + ' (' + file.size + 'b)</a><br />').appendTo($parent);
+        var $download = $('<a>Download ' + file.name + ' (' + file.size + ' bytes)</a><br />').appendTo($parent);
         $download.attr('href', url);
         $download.addClass('btn').addClass('btn-success');
       });

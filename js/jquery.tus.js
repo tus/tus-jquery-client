@@ -37,7 +37,8 @@
     this.options = {
       // The tus upload endpoint url
       endpoint: options.endpoint,
-      reset: options.reset
+      reset: options.reset,
+      reset_when_complete: options.reset_when_complete
     };
 
     // The url of the uploaded file, assigned by the tus upload endpoint
@@ -62,7 +63,6 @@
 
     // Optionally reset
     if (self.options.reset === true) {
-      console.log('Resetting any known cached url for ' + self.file.name);
       self._cachedUrl(false);
     }
 
@@ -153,6 +153,11 @@
       })
       .done(function() {
         console.log('done', arguments, self, self.url);
+
+        if (self.options.reset_when_complete === true) {
+          self._cachedUrl(false);
+        }
+
         self._emitDone();
       });
   };
@@ -194,6 +199,7 @@
     var fingerPrint = 'file-' + this.file.name + '-' + this.file.size;
 
     if (url === false) {
+      console.log('Resetting any known cached url for ' + this.file.name);
       localStorage.removeItem(fingerPrint);
       return true;
     }
