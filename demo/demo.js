@@ -15,8 +15,8 @@ $(function() {
 
     var options = {
       endpoint: 'http://localhost:1080/files',
-      reset: $('#reset').prop('checked'),
-      reset_when_complete: true
+      reset_before: $('#reset_before').prop('checked'),
+      reset_after: true
     };
 
     tus

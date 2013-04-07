@@ -37,8 +37,8 @@
     this.options = {
       // The tus upload endpoint url
       endpoint: options.endpoint,
-      reset: options.reset,
-      reset_when_complete: options.reset_when_complete
+      reset_before: options.reset_before,
+      reset_after: options.reset_after
     };
 
     // The url of the uploaded file, assigned by the tus upload endpoint
@@ -61,8 +61,8 @@
     var self = this;
     var reqOptions;
 
-    // Optionally reset
-    if (self.options.reset === true) {
+    // Optionally reset_before
+    if (self.options.reset_before === true) {
       self._cachedUrl(false);
     }
 
@@ -154,7 +154,7 @@
       .done(function() {
         console.log('done', arguments, self, self.url);
 
-        if (self.options.reset_when_complete === true) {
+        if (self.options.reset_after === true) {
           self._cachedUrl(false);
         }
 
