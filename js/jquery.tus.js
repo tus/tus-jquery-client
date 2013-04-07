@@ -46,8 +46,6 @@
 
   // Creates a file resource at the configured tus endpoint and gets the url for it.
   ResumableUpload.prototype._start = function() {
-    // @todo: fingerprint, use localstorage, don't do post if we can resume
-    // if so, do a HEAD
     var self = this;
 
     var fingerPrint = self._fingerPrint(self.file);
@@ -57,17 +55,18 @@
 
     // To reset:
     // localStorage.removeItem(fingerPrint);
+    var options;
 
     if (self.url) {
       console.log('Resuming known url ' + self.url);
       // Resume against existing url
-      var options = {
+      options = {
         type: 'HEAD',
-        url: self.url,
+        url: self.url
       };
     } else {
       // New upload, get url
-      var options = {
+      options = {
         type: 'POST',
         url: self.options.endpoint,
         headers: {
@@ -158,6 +157,6 @@
   // Uploads the file data to tus resource url created by _start()
   ResumableUpload.prototype._fingerPrint = function(file) {
     var fingerPrint = 'file-' + file.name + '-' + file.size;
-    return fingerPrint
+    return fingerPrint;
   };
 })(jQuery);
