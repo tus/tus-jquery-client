@@ -16,6 +16,7 @@ $(function() {
       .done(function(url) {
         var $download = $('<a>Download uploaded file</a>').appendTo($parent);
         $download.attr('href', url);
+        $download.addClass('btn').addClass('btn-success');
       });
   });
 });

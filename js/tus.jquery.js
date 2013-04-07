@@ -47,15 +47,15 @@
     var self = this;
     var options = {
       type: 'POST',
-      url: this.options.endpoint,
+      url: self.options.endpoint,
       headers: {
-        'Content-Range': 'bytes */' + this.file.size,
-        'Content-Disposition': 'attachment; filename="' + encodeURI(this.file.name) + '"'
+        'Content-Range': 'bytes */' + self.file.size,
+        'Content-Disposition': 'attachment; filename="' + encodeURI(self.file.name) + '"'
       }
     };
 
-    this.bytesUploaded = 0;
-    this.bytesTotal = this.file.size;
+    self.bytesUploaded = 0;
+    self.bytesTotal = self.file.size;
 
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
@@ -71,27 +71,27 @@
 
         // We now have a url, time to fire the progress event!
         self._deferred.notifyWith(self);
-        self._upload();
+        self._upload(0, self.file.size -1);
       });
   };
 
   // Uploads the file data to tus resource url created by _start()
-  ResumableUpload.prototype._upload = function() {
+  ResumableUpload.prototype._upload = function(range_from, range_to) {
     var self  = this;
-    var slice = this.file.slice || this.file.webkitSlice || this.file.mozSlice;
-    var blob  = slice.call(this.file, 0, this.file.size, this.file.type);
+    var slice = self.file.slice || self.file.webkitSlice || self.file.mozSlice;
+    var blob  = slice.call(self.file, range_from, (range_to - range_from) + 1, self.file.type);
     var xhr   = $.ajaxSettings.xhr();
 
     var options = {
       type: 'PUT',
-      url: this.url,
+      url: self.url,
       data: blob,
       processData: false,
-      contentType: this.file.type,
+      contentType: self.file.type,
       cache: false,
       xhr: function() { return xhr },
       headers: {
-        'Content-Range': 'bytes 0-' + (this.file.size - 1)  + '/' + this.file.size,
+        'Content-Range': 'bytes ' + range_from + '-' + range_to  + '/' + self.file.size,
       }
     };
 
