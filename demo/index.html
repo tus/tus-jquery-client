@@ -16,8 +16,12 @@
         This demo is just here to aid developers.
       </p>
 
+      <label for="reset"><input type="checkbox" name="reset" id="reset"> start from begin</label>
       <input type="file"><br />
-      <button class="btn btn-danger"><i class="icon-white icon-stop"></i> kill</button><br />
+      <button class="btn btn-danger stop" rel="tooltip" title="Stop any upload"><i class="icon-white icon-stop"></i> stop</button>
+
+      <hr />
+
     </div>
   </body>
 
@@ -25,4 +29,7 @@
   <script src="/js/jquery.tus.js"></script>
   <script src="/demo/demo.js"></script>
   <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+  <script type="text/javascript">
+    $('button[rel]').tooltip();
+  </script>
 </html>

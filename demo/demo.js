@@ -5,6 +5,8 @@ $(function() {
     console.log('selected file', file);
 
     var options = {endpoint: 'http://localhost:1080/files'};
+    options.reset = $('#reset').val() === 'on';
+
     tus
       .upload(file, options)
       .fail(function(error) {

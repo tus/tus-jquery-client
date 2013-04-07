@@ -20,7 +20,7 @@
         upload._start();
       }
       return upload;
-    }
+    },
   };
 
   function ResumableUpload(file, options) {
@@ -29,7 +29,8 @@
     // Options for resumable file uploads
     this.options = {
       // The tus upload endpoint url
-      endpoint: options.endpoint
+      endpoint: options.endpoint,
+      reset: options.reset
     };
 
     // The url of the uploaded file, assigned by the tus upload endpoint
@@ -47,25 +48,26 @@
   // Creates a file resource at the configured tus endpoint and gets the url for it.
   ResumableUpload.prototype._start = function() {
     var self = this;
+    var reqOptions;
+
+    // Optionally reset
+    if (self.options.reset === true) {
+      self._cachedUrl(false);
+    }
 
     self.url        = self._cachedUrl();
     self.bytesTotal = self.file.size;
 
-    // To reset:
-    // self._cachedUrl(false);
-
-    var options;
-
     if (self.url) {
       console.log('Resuming known url ' + self.url);
       // Resume against existing url
-      options = {
+      reqOptions = {
         type: 'HEAD',
         url: self.url
       };
     } else {
       // New upload, get url
-      options = {
+      reqOptions = {
         type: 'POST',
         url: self.options.endpoint,
         headers: {
@@ -75,7 +77,7 @@
       };
     }
 
-    $.ajax(options)
+    $.ajax(reqOptions)
       .fail(function(jqXHR, textStatus, errorThrown) {
         // @TODO: Implement retry support
         self._deferred.reject(new Error('Could not create file resource: ' + textStatus), jqXHR, errorThrown);
