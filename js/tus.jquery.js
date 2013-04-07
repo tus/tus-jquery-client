@@ -77,10 +77,10 @@
 
   // Uploads the file data to tus resource url created by _start()
   ResumableUpload.prototype._upload = function() {
-    var self = this;
+    var self  = this;
     var slice = this.file.slice || this.file.webkitSlice || this.file.mozSlice;
-    var blob = slice.call(this.file, 0, this.file.size, this.file.type);
-    var xhr = $.ajaxSettings.xhr();
+    var blob  = slice.call(this.file, 0, this.file.size, this.file.type);
+    var xhr   = $.ajaxSettings.xhr();
 
     var options = {
       type: 'PUT',
