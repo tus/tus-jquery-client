@@ -18,7 +18,7 @@
       var upload = new ResumableUpload(file, options);
       upload._start();
       return upload;
-    },
+    }
   };
 
   function ResumableUpload(file, options) {
@@ -27,7 +27,7 @@
     // Options for resumable file uploads
     this.options = {
       // The tus upload endpoint url
-      endpoint: options.endpoint,
+      endpoint: options.endpoint
     };
 
     // The url of the uploaded file, assigned by the tus upload endpoint
@@ -97,9 +97,11 @@
       processData: false,
       contentType: self.file.type,
       cache: false,
-      xhr: function() { return xhr },
+      xhr: function() {
+        return xhr;
+      },
       headers: {
-        'Content-Range': 'bytes ' + range_from + '-' + range_to  + '/' + self.file.size,
+        'Content-Range': 'bytes ' + range_from + '-' + range_to  + '/' + self.file.size
       }
     };
 
