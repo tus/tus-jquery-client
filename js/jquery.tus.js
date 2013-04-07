@@ -48,13 +48,12 @@
   ResumableUpload.prototype._start = function() {
     var self = this;
 
-    var fingerPrint = self._fingerPrint(self.file);
-
-    self.url        = localStorage.getItem(fingerPrint);
+    self.url        = self._cachedUrl();
     self.bytesTotal = self.file.size;
 
     // To reset:
-    // localStorage.removeItem(fingerPrint);
+    // self._cachedUrl(false);
+
     var options;
 
     if (self.url) {
@@ -88,8 +87,8 @@
             self._deferred.reject(new Error('Could not get url for file resource: ' + textStatus));
             return;
           }
-          console.log('Saving', fingerPrint, self.url);
-          localStorage.setItem(fingerPrint, self.url);
+
+          self._cachedUrl(self.url);
           self.bytesUploaded = 0;
         } else {
           self.bytesUploaded = self._bytesUploaded(jqXHR.getResponseHeader('Range'));
@@ -154,9 +153,19 @@
     return parseInt(parts[1], 10) + 1;
   },
 
-  // Uploads the file data to tus resource url created by _start()
-  ResumableUpload.prototype._fingerPrint = function(file) {
-    var fingerPrint = 'file-' + file.name + '-' + file.size;
-    return fingerPrint;
+  ResumableUpload.prototype._cachedUrl = function(url) {
+    var fingerPrint = 'file-' + this.file.name + '-' + this.file.size;
+console.log('url', url);
+    if (url === false) {
+      localStorage.removeItem(fingerPrint);
+      return true;
+    }
+
+    if (url) {
+      localStorage.setItem(fingerPrint, url);
+      return true;
+    }
+
+    return localStorage.getItem(fingerPrint);
   };
 })(jQuery);
