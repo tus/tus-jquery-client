@@ -1,5 +1,6 @@
 $(function() {
   $('input[type=file]').change(function() {
+    var $parent = $(this).parent();
     var file = this.files[0];
     console.log('selected file', file);
 
@@ -13,7 +14,8 @@ $(function() {
         console.log(bytesUploaded, bytesTotal);
       })
       .done(function(url) {
-        console.log(url);
+        var $download = $('<a>Download uploaded file</a>').appendTo($parent);
+        $download.attr('href', url);
       });
   });
 });
