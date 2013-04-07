@@ -34,7 +34,7 @@
     this.url = null;
     // Bytes sent to the server so far
     this.bytesUploaded = null;
-    // Total amount of bytes to sent
+    // Total amount of bytes to send
     this.bytesTotal = null;
 
     // Create a deferred and make our upload a promise object
@@ -57,7 +57,7 @@
     };
 
     self.bytesUploaded = 0;
-    self.bytesTotal = self.file.size;
+    self.bytesTotal    = self.file.size;
 
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
@@ -74,7 +74,7 @@
         // We now have a url, time to fire the progress event!
         self._deferred.notifyWith(self);
 
-        // @todo: Don't start at 0 if we could resume. use the head to
+        // @todo: Don't start at 0 if we could resume. Use the head to
         // determine where to take off
         var range_from = 0;
         var range_to = self.file.size -1;
