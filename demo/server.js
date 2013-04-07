@@ -2,7 +2,7 @@ var http = require('http');
 var send = require('send');
 var port = process.env.PORT || 8080;
 
-http.createServer(function(req, res){
+http.createServer(function(req, res) {
   if (req.url === '/') {
     res.writeHead(301, {'Location': '/demo/index.html'});
     res.end();
