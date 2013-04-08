@@ -95,6 +95,7 @@
       })
       .done(function(data, textStatus, jqXHR) {
         if (!self.url) {
+          // We did the POST
           if (!(self.url = jqXHR.getResponseHeader('Location'))) {
             self._deferred.reject(new Error('Could not get url for file resource: ' + textStatus));
             return;
@@ -103,11 +104,18 @@
           self._cachedUrl(self.url);
           self.bytesUploaded = 0;
         } else {
-          self.bytesUploaded = self._bytesUploaded(jqXHR.getResponseHeader('Range'));
-
-          if (self.bytesUploaded === self.file.size) {
-            self._emitDone();
-            return;
+          // We did the HEAD
+          var range = jqXHR.getResponseHeader('Range');
+          var m = range && range.match(/bytes=\d+-(\d+)/);
+          if (!m) {
+            self._cachedUrl(false);
+            self.bytesUploaded = 0;
+          } else {
+            self.bytesUploaded = parseInt(m[1], 10) + 1;
+            if (self.bytesUploaded === self.file.size) {
+              self._emitDone();
+              return;
+            }
           }
         }
 
@@ -123,7 +131,7 @@
     var self  = this;
 
     var slice = self.file.slice || self.file.webkitSlice || self.file.mozSlice;
-    var blob  = slice.call(self.file, range_from, (range_to - range_from) + 1, self.file.type);
+    var blob  = slice.call(self.file, range_from, range_to + 1, self.file.type);
     var xhr   = $.ajaxSettings.xhr();
 
     var options = {
@@ -148,8 +156,10 @@
 
     this.jqXHR = $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
-        self._emitFail(textStatus + ' - ' + errorThrown);
-        console.log('fail', arguments);
+        // Compile somewhat meaningful error
+        // Needs to be cleaned up
+        var msg = jqXHR.responseText || textStatus || errorThrown;
+        self._emitFail(msg);
       })
       .done(function() {
         console.log('done', arguments, self, self.url);
@@ -167,21 +177,6 @@
       this.jqXHR.abort();
     }
   };
-
-  // Parses the Range header from the server response
-  // and returns the uploaded bytes:
-  ResumableUpload.prototype._bytesUploaded = function (range) {
-    if (!range) {
-      return;
-    }
-
-    var parts = range.split('-');
-    if (parts.length < 2) {
-      return;
-    }
-
-    return parseInt(parts[1], 10) + 1;
-  },
 
   ResumableUpload.prototype._emitProgress = function(e) {
     this._deferred.notifyWith(this, [e, this.bytesUploaded, this.bytesTotal]);
