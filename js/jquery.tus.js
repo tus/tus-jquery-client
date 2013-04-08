@@ -14,6 +14,7 @@
 
   // The Public API
   var tus = window.tus = {
+    // @TODO Remove, keeping state like this belongs into the demo.js, it's app specific
     currentUpload: null,
 
     upload: function(file, options) {
@@ -37,16 +38,24 @@
     this.options = {
       // The tus upload endpoint url
       endpoint: options.endpoint,
+      // @TODO: style in JS people use resetBefore casing
+      // @TODO: replace with optionally providing a fingerprint
+      // e.g. fingerprint = false resets, function gives flexibilty,
+      // null: uses our own
       reset_before: options.reset_before,
       reset_after: options.reset_after
     };
 
     // The url of the uploaded file, assigned by the tus upload endpoint
+    // @TODO rename to fileUrl
     this.url = null;
     // Bytes sent to the server so far
+    // @TODO Rename / always call this bytesWritten
     this.bytesUploaded = null;
+    // @TODO Add this.bytesTotal again
 
     // the jqXHR object
+    // @TODO make private?
     this.jqXHR = null;
 
     // Create a deferred and make our upload a promise object
@@ -55,6 +64,7 @@
   }
 
   ResumableUpload.prototype._post = function(url, file, cb) {
+    // @TODO stop aligning = signs (it's cute, but distracting without an automated tool like gofmt)
     var self    = this;
     var options = {
       type: 'POST',
@@ -81,6 +91,7 @@
 
   ResumableUpload.prototype._head = function(url, cb) {
     var self    = this;
+    // @TODO probably needs cache: false option (and maybe more)
     var options = {
       type: 'HEAD',
       url: url
@@ -108,6 +119,7 @@
   };
 
   // Creates a file resource at the configured tus endpoint and gets the url for it.
+  // @TODO Move this to top, I like code being organized in order of execution
   ResumableUpload.prototype._start = function() {
     var self = this;
 
@@ -117,6 +129,7 @@
     }
 
 
+    // @TODO this belongs in _uploadFile
     var transmit = function (url, bytesUploaded) {
       // Save url
       self.bytesUploaded = bytesUploaded;
@@ -129,12 +142,15 @@
 
       self._cachedUrl(url);
       self._emitProgress();
+      // @TODO rename to _uploadFile
       self._upload(url, self.bytesUploaded, self.file.size - 1);
     };
 
     if (!(self.url = self._cachedUrl())) {
+      // @TODO rename to _createFile
       self._post(self.options.endpoint, self.file, transmit);
     } else {
+      // @TODO rename to _checkFile
       self._head(self.url, transmit);
     }
   };
@@ -169,8 +185,9 @@
 
     this.jqXHR = $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
-        // Compile somewhat meaningful error
+        // @TODO: Compile somewhat meaningful error
         // Needs to be cleaned up
+        // Needs to have retry
         var msg = jqXHR.responseText || textStatus || errorThrown;
         self._emitFail(msg);
       })
@@ -204,6 +221,10 @@
   };
 
   ResumableUpload.prototype._cachedUrl = function(url) {
+    // @TODO: there is also file.mediaType (or similar, check File Upload Spec) which should
+    // be thrown into this as well. The prefix for this should probably be 'tus-' as well
+    // (file- is too generic, tus is the vendor)
+    // @TODO: Make this a public tus.fingerprint() function on the global API.
     var fingerPrint = 'file-' + this.file.name + '-' + this.file.size;
 
     if (url === false) {
