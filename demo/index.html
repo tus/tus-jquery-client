@@ -16,13 +16,26 @@
         This demo is just here to aid developers.
       </p>
 
+      <br />
+
       <input type="file"><br />
-      <label for="reset_before"><input type="checkbox" name="reset_before" id="reset_before"> full upload (even if we can resume)</label>
+      <label for="reset_before">
+        <input type="checkbox" name="reset_before" id="reset_before"> 
+        Perform full upload (even if we can resume)
+      </label>
 
       <br />
-      <br />
 
-      <button class="btn btn-danger stop js-stop disabled"><i class="icon-white icon-stop"></i> abort upload</button>
+      <div class="row">
+        <div class="span8">
+          <div class="progress progress-striped progress-success">
+            <div class="bar" style="width: 0%;"></div>
+          </div>
+        </div>
+        <div class="span4">
+          <button class="btn btn-danger stop js-stop disabled"><i class="icon-white icon-stop"></i> abort upload</button>
+        </div>
+      </div>
 
       <hr />
       <h3>Uploads</h3>

@@ -16,9 +16,10 @@ $(function() {
     var options = {
       endpoint: 'http://localhost:1080/files',
       reset_before: $('#reset_before').prop('checked'),
-      reset_after: true
+      reset_after: false
     };
 
+    $('.progress').addClass('active');
     tus
       .upload(file, options)
       .fail(function(error) {
@@ -27,9 +28,11 @@ $(function() {
       .always(function() {
         $input.val('');
         $('.js-stop').addClass('disabled');
+        $('.progress').removeClass('active');
       })
       .progress(function(e, bytesUploaded, bytesTotal) {
         var percentage = (bytesUploaded / bytesTotal * 100).toFixed(2);
+        $('.progress .bar').css('width', percentage + '%');
         console.log(bytesUploaded, bytesTotal, percentage + '%');
       })
       .done(function(url, file) {
