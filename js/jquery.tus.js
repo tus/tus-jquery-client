@@ -88,7 +88,7 @@
 
     console.log('Resuming known url ' + url);
 
-    $.ajax(options   )
+    $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
         // @todo: Implement retry support
         self_emitFail('Could not head at file resource: ' + textStatus);
@@ -118,13 +118,15 @@
 
 
     var transmit = function (url, bytesUploaded) {
-      if (bytesUploaded === self.file.size) {
+      // Save url
+      self.bytesUploaded = bytesUploaded;
+
+      if (self.bytesUploaded === self.file.size) {
         // Cool, we already completely uploaded this
+        self._emitProgress(); // <-- update progress to 100%
         return self._emitDone();
       }
 
-      // Save url
-      self.bytesUploaded = bytesUploaded;
       self._cachedUrl(url);
       self._emitProgress();
       self._upload(url, self.bytesUploaded, self.file.size - 1);
