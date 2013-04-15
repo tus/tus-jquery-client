@@ -80,8 +80,7 @@
 
       self._cachedUrl(url);
       self._emitProgress();
-      // @TODO rename to _uploadFile
-      self._upload(url, self.bytesUploaded, self.file.size - 1);
+      self._uploadFile(url, self.bytesUploaded, self.file.size - 1);
     };
 
     if (!(self.url = self._cachedUrl())) {
@@ -149,7 +148,7 @@
   };
 
   // Uploads the file data to tus resource url created by _start()
-  ResumableUpload.prototype._upload = function(url, range_from, range_to) {
+  ResumableUpload.prototype._uploadFile = function(url, range_from, range_to) {
     var self  = this;
 
     var slice = self.file.slice || self.file.webkitSlice || self.file.mozSlice;
