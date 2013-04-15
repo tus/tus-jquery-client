@@ -34,8 +34,8 @@
       // The tus upload endpoint url
       endpoint: options.endpoint,
 
-      // The fingerprint for the file. If not string, uses our own
-      // fingerprinting.
+      // The fingerprint for the file.
+      // Uses our own fingerprinting if undefined.
       fingerprint: options.fingerprint,
 
       // @TODO: second option: resumable: true/false
