@@ -132,7 +132,7 @@
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
         // @TODO: Implement retry support
-        self_emitFail('Could not head at file resource: ' + textStatus);
+        self._emitFail('Could not head at file resource: ' + textStatus);
       })
       .done(function(data, textStatus, jqXHR) {
         var range = jqXHR.getResponseHeader('Range');
