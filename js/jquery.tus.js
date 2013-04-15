@@ -31,8 +31,9 @@
       // The tus upload endpoint url
       endpoint: options.endpoint,
 
-      // @TODO: replace with optionally providing a fingerprint as string
-      // if not string, use our own
+      // The fingerprint for the file. If not string, uses our own
+      // fingerprinting.
+      fingerprint: options.fingerprint,
 
       // @TODO: second option: resumable: true/false
       // false -> removes resume functionality
@@ -209,9 +210,15 @@
     this._deferred.rejectWith(this, [err]);
   };
 
+  ResumableUpload.prototype._fingerprint = function() {
+    return 'tus-' + this.file.name + '-' + this.file.type + '-' + this.file.size;
+  };
+
   ResumableUpload.prototype._cachedUrl = function(url) {
     // @TODO: Make this a public tus.fingerprint() function on the global API.
-    var fingerPrint = 'tus-' + this.file.name + '-' + this.file.type + '-' + this.file.size;
+    var fingerPrint = this.options.fingerprint !== undefined
+                      ? this.options.fingerprint
+                      : this._fingerprint();
 
     if (url === false) {
       console.log('Resetting any known cached url for ' + this.file.name);
