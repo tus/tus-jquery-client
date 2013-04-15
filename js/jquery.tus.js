@@ -56,6 +56,43 @@
     this._deferred.promise(this);
   }
 
+  // Creates a file resource at the configured tus endpoint and gets the url for it.
+  ResumableUpload.prototype._start = function() {
+    var self = this;
+
+    // Optionally resetBefore
+    if (self.options.resetBefore === true) {
+      self._cachedUrl(false);
+    }
+
+
+    // @TODO this belongs in _uploadFile
+    var transmit = function (url, bytesUploaded) {
+      // Save url
+      self.bytesUploaded = bytesUploaded;
+
+      if (self.bytesUploaded === self.file.size) {
+        // Cool, we already completely uploaded this.
+        // Update progress to 100%.
+        self._emitProgress();
+        return self._emitDone();
+      }
+
+      self._cachedUrl(url);
+      self._emitProgress();
+      // @TODO rename to _uploadFile
+      self._upload(url, self.bytesUploaded, self.file.size - 1);
+    };
+
+    if (!(self.url = self._cachedUrl())) {
+      // @TODO rename to _createFile
+      self._post(self.options.endpoint, self.file, transmit);
+    } else {
+      // @TODO rename to _checkFile
+      self._head(self.url, transmit);
+    }
+  };
+
   ResumableUpload.prototype._post = function(url, file, cb) {
     // @TODO stop aligning = signs (it's cute, but distracting without an automated tool like gofmt)
     var self    = this;
@@ -109,43 +146,6 @@
 
         cb(url, bytesUploaded);
       });
-  };
-
-  // Creates a file resource at the configured tus endpoint and gets the url for it.
-  // @TODO Move this to top, I like code being organized in order of execution
-  ResumableUpload.prototype._start = function() {
-    var self = this;
-
-    // Optionally resetBefore
-    if (self.options.resetBefore === true) {
-      self._cachedUrl(false);
-    }
-
-
-    // @TODO this belongs in _uploadFile
-    var transmit = function (url, bytesUploaded) {
-      // Save url
-      self.bytesUploaded = bytesUploaded;
-
-      if (self.bytesUploaded === self.file.size) {
-        // Cool, we already completely uploaded this
-        self._emitProgress(); // <-- update progress to 100%
-        return self._emitDone();
-      }
-
-      self._cachedUrl(url);
-      self._emitProgress();
-      // @TODO rename to _uploadFile
-      self._upload(url, self.bytesUploaded, self.file.size - 1);
-    };
-
-    if (!(self.url = self._cachedUrl())) {
-      // @TODO rename to _createFile
-      self._post(self.options.endpoint, self.file, transmit);
-    } else {
-      // @TODO rename to _checkFile
-      self._head(self.url, transmit);
-    }
   };
 
   // Uploads the file data to tus resource url created by _start()
