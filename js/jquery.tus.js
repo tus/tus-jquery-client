@@ -69,28 +69,10 @@
       self._cachedUrl(false);
     }
 
-
-    // @TODO this belongs in _uploadFile
-    var transmit = function (url, bytesWritten) {
-      // Save url
-      self.bytesWritten = bytesWritten;
-
-      if (self.bytesWritten === self.file.size) {
-        // Cool, we already completely uploaded this.
-        // Update progress to 100%.
-        self._emitProgress();
-        return self._emitDone();
-      }
-
-      self._cachedUrl(url);
-      self._emitProgress();
-      self._uploadFile(url, self.bytesWritten, self.file.size - 1);
-    };
-
     if (!(self.fileUrl = self._cachedUrl())) {
-      self._post(self.options.endpoint, self.file, transmit);
+      self._post(self.options.endpoint, self.file);
     } else {
-      self._head(self.fileUrl, transmit);
+      self._head(self.fileUrl);
     }
   };
 
@@ -115,7 +97,7 @@
           return self._emitFail('Could not get url for file resource: ' + textStatus);
         }
 
-        cb(url, 0);
+        self._uploadFile(url, 0, file.size - 1);
       });
   };
 
@@ -144,13 +126,26 @@
           bytesWritten = parseInt(m[1], 10) + 1;
         }
 
-        cb(url, bytesWritten);
+        self._uploadFile(url, bytesWritten, self.file.size - 1);
       });
   };
 
   // Uploads the file data to tus resource url created by _start()
   ResumableUpload.prototype._uploadFile = function(url, range_from, range_to) {
     var self  = this;
+    this.bytesWritten = range_from;
+
+    if (this.bytesWritten === this.file.size) {
+      // Cool, we already completely uploaded this.
+      // Update progress to 100%.
+      this._emitProgress();
+      return this._emitDone();
+    }
+
+    this._cachedUrl(url);
+    this._emitProgress();
+
+    var bytesWrittenAtStart = this.bytesWritten;
 
     var slice = self.file.slice || self.file.webkitSlice || self.file.mozSlice;
     var blob  = slice.call(self.file, range_from, range_to + 1, self.file.type);
@@ -172,7 +167,7 @@
     };
 
     $(xhr.upload).bind('progress', function(e) {
-      self.bytesWritten = e.originalEvent.loaded;
+      self.bytesWritten = bytesWrittenAtStart + e.originalEvent.loaded;
       self._emitProgress(e);
     });
 
