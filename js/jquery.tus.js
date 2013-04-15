@@ -30,15 +30,14 @@
     this.options = {
       // The tus upload endpoint url
       endpoint: options.endpoint,
-      // @TODO: style in JS people use resetBefore casing
 
       // @TODO: replace with optionally providing a fingerprint as string
       // if not string, use our own
 
       // @TODO: second option: resumable: true/false
       // false -> removes resume functionality
-      reset_before: options.reset_before,
-      reset_after: options.reset_after
+      resetBefore: options.resetBefore,
+      resetAfter: options.resetAfter
     };
 
     // The url of the uploaded file, assigned by the tus upload endpoint
@@ -95,7 +94,7 @@
 
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
-        // @todo: Implement retry support
+        // @TODO: Implement retry support
         self_emitFail('Could not head at file resource: ' + textStatus);
       })
       .done(function(data, textStatus, jqXHR) {
@@ -117,8 +116,8 @@
   ResumableUpload.prototype._start = function() {
     var self = this;
 
-    // Optionally reset_before
-    if (self.options.reset_before === true) {
+    // Optionally resetBefore
+    if (self.options.resetBefore === true) {
       self._cachedUrl(false);
     }
 
@@ -188,7 +187,7 @@
       .done(function() {
         console.log('done', arguments, self, url);
 
-        if (self.options.reset_after === true) {
+        if (self.options.resetAfter === true) {
           self._cachedUrl(false);
         }
 
