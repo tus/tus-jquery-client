@@ -103,10 +103,10 @@
 
   ResumableUpload.prototype._head = function(url, cb) {
     var self    = this;
-    // @TODO probably needs cache: false option (and maybe more)
     var options = {
       type: 'HEAD',
-      url: url
+      url: url,
+      cache: false
     };
 
     console.log('Resuming known url ' + url);
