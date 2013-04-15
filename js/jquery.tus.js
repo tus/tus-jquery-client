@@ -209,9 +209,10 @@
   };
 
   ResumableUpload.prototype._cachedUrl = function(url) {
-    var fingerPrint = this.options.fingerprint !== undefined
-                      ? this.options.fingerprint
-                      : tus.fingerprint(this.file);
+    var fingerPrint = this.options.fingerprint;
+    if (fingerPrint === undefined) {
+      fingerPrint = tus.fingerprint(this.file);
+    }
 
     if (url === false) {
       console.log('Resetting any known cached url for ' + this.file.name);
