@@ -93,12 +93,12 @@
         self._emitFail('Could not post to file resource: ' + textStatus);
       })
       .done(function(data, textStatus, jqXHR) {
-        var url;
-        if (!(url = jqXHR.getResponseHeader('Location'))) {
+        var location = jqXHR.getResponseHeader('Location');
+        if (!location) {
           return self._emitFail('Could not get url for file resource: ' + textStatus);
         }
 
-        self.fileUrl = url;
+        self.fileUrl = location;
         self._uploadFile(0, self.file.size - 1);
       });
   };
