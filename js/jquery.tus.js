@@ -211,11 +211,8 @@
   };
 
   ResumableUpload.prototype._cachedUrl = function(url) {
-    // @TODO: there is also file.mediaType (or similar, check File Upload Spec) which should
-    // be thrown into this as well. The prefix for this should probably be 'tus-' as well
-    // (file- is too generic, tus is the vendor)
     // @TODO: Make this a public tus.fingerprint() function on the global API.
-    var fingerPrint = 'file-' + this.file.name + '-' + this.file.size;
+    var fingerPrint = 'tus-' + this.file.name + '-' + this.file.type + '-' + this.file.size;
 
     if (url === false) {
       console.log('Resetting any known cached url for ' + this.file.name);
