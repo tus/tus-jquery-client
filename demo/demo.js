@@ -18,8 +18,7 @@ $(function() {
     $('.js-stop').removeClass('disabled');
 
     var options = {
-      // endpoint: 'http://localhost:1080/files',
-      endpoint: 'http://master.tus.io/files',
+      endpoint: 'http://localhost:1080/files',
       reset_before: $('#reset_before').prop('checked'),
       reset_after: false
     };
