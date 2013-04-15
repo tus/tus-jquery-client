@@ -44,8 +44,9 @@
     // @TODO rename to fileUrl
     this.url = null;
     // Bytes sent to the server so far
-    // @TODO Rename / always call this bytesWritten
-    this.bytesUploaded = null;
+
+    this.bytesWritten = null;
+
     // @TODO Add this.bytesTotal again
 
     // the jqXHR object
@@ -69,9 +70,9 @@
     // @TODO this belongs in _uploadFile
     var transmit = function (url, bytesUploaded) {
       // Save url
-      self.bytesUploaded = bytesUploaded;
+      self.bytesWritten = bytesUploaded;
 
-      if (self.bytesUploaded === self.file.size) {
+      if (self.bytesWritten === self.file.size) {
         // Cool, we already completely uploaded this.
         // Update progress to 100%.
         self._emitProgress();
@@ -80,7 +81,7 @@
 
       self._cachedUrl(url);
       self._emitProgress();
-      self._uploadFile(url, self.bytesUploaded, self.file.size - 1);
+      self._uploadFile(url, self.bytesWritten, self.file.size - 1);
     };
 
     if (!(self.url = self._cachedUrl())) {
@@ -171,7 +172,7 @@
     };
 
     $(xhr.upload).bind('progress', function(e) {
-      self.bytesUploaded = e.originalEvent.loaded;
+      self.bytesWritten = e.originalEvent.loaded;
       self._emitProgress(e);
     });
 
@@ -201,7 +202,7 @@
   };
 
   ResumableUpload.prototype._emitProgress = function(e) {
-    this._deferred.notifyWith(this, [e, this.bytesUploaded, this.file.size]);
+    this._deferred.notifyWith(this, [e, this.bytesWritten, this.file.size]);
   };
 
   ResumableUpload.prototype._emitDone = function() {
