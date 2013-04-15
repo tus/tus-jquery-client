@@ -66,10 +66,10 @@
 
     // Optionally resetBefore
     if (self.options.resetBefore === true) {
-      self._cachedUrl(false);
+      self._urlCache(false);
     }
 
-    if (!(self.fileUrl = self._cachedUrl())) {
+    if (!(self.fileUrl = self._urlCache())) {
       self._post(self.options.endpoint, self.file);
     } else {
       self._head(self.fileUrl);
@@ -142,7 +142,7 @@
       return this._emitDone();
     }
 
-    this._cachedUrl(url);
+    this._urlCache(url);
     this._emitProgress();
 
     var bytesWrittenAtStart = this.bytesWritten;
@@ -183,7 +183,7 @@
         console.log('done', arguments, self, url);
 
         if (self.options.resetAfter === true) {
-          self._cachedUrl(false);
+          self._urlCache(false);
         }
 
         self._emitDone();
@@ -208,7 +208,7 @@
     this._deferred.rejectWith(this, [err]);
   };
 
-  ResumableUpload.prototype._cachedUrl = function(url) {
+  ResumableUpload.prototype._urlCache = function(url) {
     var fingerPrint = this.options.fingerprint;
     if (fingerPrint === undefined) {
       fingerPrint = tus.fingerprint(this.file);
