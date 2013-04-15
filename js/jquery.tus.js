@@ -20,6 +20,9 @@
         upload._start();
       }
       return upload;
+    },
+    fingerprint: function(file) {
+      return 'tus-' + file.name + '-' + file.type + '-' + file.size;
     }
   };
 
@@ -210,15 +213,10 @@
     this._deferred.rejectWith(this, [err]);
   };
 
-  ResumableUpload.prototype._fingerprint = function() {
-    return 'tus-' + this.file.name + '-' + this.file.type + '-' + this.file.size;
-  };
-
   ResumableUpload.prototype._cachedUrl = function(url) {
-    // @TODO: Make this a public tus.fingerprint() function on the global API.
     var fingerPrint = this.options.fingerprint !== undefined
                       ? this.options.fingerprint
-                      : this._fingerprint();
+                      : tus.fingerprint(this.file);
 
     if (url === false) {
       console.log('Resetting any known cached url for ' + this.file.name);
