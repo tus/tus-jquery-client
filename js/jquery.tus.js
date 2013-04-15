@@ -41,10 +41,9 @@
     };
 
     // The url of the uploaded file, assigned by the tus upload endpoint
-    // @TODO rename to fileUrl
-    this.url = null;
-    // Bytes sent to the server so far
+    this.fileUrl = null;
 
+    // Bytes sent to the server so far
     this.bytesWritten = null;
 
     // @TODO Add this.bytesTotal again
@@ -84,10 +83,10 @@
       self._uploadFile(url, self.bytesWritten, self.file.size - 1);
     };
 
-    if (!(self.url = self._cachedUrl())) {
+    if (!(self.fileUrl = self._cachedUrl())) {
       self._post(self.options.endpoint, self.file, transmit);
     } else {
-      self._head(self.url, transmit);
+      self._head(self.fileUrl, transmit);
     }
   };
 
@@ -203,7 +202,7 @@
   };
 
   ResumableUpload.prototype._emitDone = function() {
-    this._deferred.resolveWith(this, [this.url, this.file]);
+    this._deferred.resolveWith(this, [this.fileUrl, this.file]);
   };
 
   ResumableUpload.prototype._emitFail = function(err) {
