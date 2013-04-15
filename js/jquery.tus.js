@@ -68,9 +68,9 @@
 
 
     // @TODO this belongs in _uploadFile
-    var transmit = function (url, bytesUploaded) {
+    var transmit = function (url, bytesWritten) {
       // Save url
-      self.bytesWritten = bytesUploaded;
+      self.bytesWritten = bytesWritten;
 
       if (self.bytesWritten === self.file.size) {
         // Cool, we already completely uploaded this.
@@ -85,16 +85,13 @@
     };
 
     if (!(self.url = self._cachedUrl())) {
-      // @TODO rename to _createFile
       self._post(self.options.endpoint, self.file, transmit);
     } else {
-      // @TODO rename to _checkFile
       self._head(self.url, transmit);
     }
   };
 
   ResumableUpload.prototype._post = function(url, file, cb) {
-    // @TODO stop aligning = signs (it's cute, but distracting without an automated tool like gofmt)
     var self    = this;
     var options = {
       type: 'POST',
@@ -137,14 +134,14 @@
       .done(function(data, textStatus, jqXHR) {
         var range = jqXHR.getResponseHeader('Range');
         var m     = range && range.match(/bytes=\d+-(\d+)/);
-        var bytesUploaded = 0;
+        var bytesWritten = 0;
         if (m) {
           // If the server has not received anything so far,
           // there will be no Range header present.
-          bytesUploaded = parseInt(m[1], 10) + 1;
+          bytesWritten = parseInt(m[1], 10) + 1;
         }
 
-        cb(url, bytesUploaded);
+        cb(url, bytesWritten);
       });
   };
 
