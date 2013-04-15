@@ -1,27 +1,32 @@
 $(function() {
+  var upload = null;
+
   $('.js-stop').click(function(e) {
     e.preventDefault();
 
-    tus.stop();
+    if (upload) {
+      upload.stop();
+    }
   });
 
   $('input[type=file]').change(function() {
-    var $input = $(this);
+    var $input  = $(this);
     var $parent = $input.parent();
-    var file = this.files[0];
+    var file    = this.files[0];
     console.log('selected file', file);
 
     $('.js-stop').removeClass('disabled');
 
     var options = {
-      endpoint: 'http://localhost:1080/files',
+      // endpoint: 'http://localhost:1080/files',
+      endpoint: 'http://master.tus.io/files',
       reset_before: $('#reset_before').prop('checked'),
       reset_after: false
     };
 
     $('.progress').addClass('active');
-    tus
-      .upload(file, options)
+
+    upload = tus.upload(file, options)
       .fail(function(error) {
         alert('Failed because: ' + error);
       })

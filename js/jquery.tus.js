@@ -14,20 +14,12 @@
 
   // The Public API
   var tus = window.tus = {
-    // @TODO Remove, keeping state like this belongs into the demo.js, it's app specific
-    currentUpload: null,
-
     upload: function(file, options) {
-      this.currentUpload = new ResumableUpload(file, options);
+      var upload = new ResumableUpload(file, options);
       if (file) {
-        this.currentUpload._start();
+        upload._start();
       }
-      return this.currentUpload;
-    },
-    stop: function(upload) {
-      if (this.currentUpload) {
-        this.currentUpload._stop();
-      }
+      return upload;
     }
   };
 
@@ -39,9 +31,12 @@
       // The tus upload endpoint url
       endpoint: options.endpoint,
       // @TODO: style in JS people use resetBefore casing
-      // @TODO: replace with optionally providing a fingerprint
-      // e.g. fingerprint = false resets, function gives flexibilty,
-      // null: uses our own
+
+      // @TODO: replace with optionally providing a fingerprint as string
+      // if not string, use our own
+
+      // @TODO: second option: resumable: true/false
+      // false -> removes resume functionality
       reset_before: options.reset_before,
       reset_after: options.reset_after
     };
@@ -55,8 +50,7 @@
     // @TODO Add this.bytesTotal again
 
     // the jqXHR object
-    // @TODO make private?
-    this.jqXHR = null;
+    this._jqXHR = null;
 
     // Create a deferred and make our upload a promise object
     this._deferred = $.Deferred();
@@ -183,7 +177,7 @@
       self._emitProgress(e);
     });
 
-    this.jqXHR = $.ajax(options)
+    this._jqXHR = $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
         // @TODO: Compile somewhat meaningful error
         // Needs to be cleaned up
@@ -202,9 +196,9 @@
       });
   };
 
-  ResumableUpload.prototype._stop = function() {
-    if (this.jqXHR) {
-      this.jqXHR.abort();
+  ResumableUpload.prototype.stop = function() {
+    if (this._jqXHR) {
+      this._jqXHR.abort();
     }
   };
 
