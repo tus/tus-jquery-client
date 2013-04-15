@@ -70,20 +70,20 @@
     }
 
     if (!(self.fileUrl = self._urlCache())) {
-      self._post(self.options.endpoint, self.file);
+      self._post();
     } else {
-      self._head(self.fileUrl);
+      self._head();
     }
   };
 
-  ResumableUpload.prototype._post = function(url, file, cb) {
+  ResumableUpload.prototype._post = function() {
     var self    = this;
     var options = {
       type: 'POST',
-      url: url,
+      url: self.options.endpoint,
       headers: {
-        'Content-Range': 'bytes */' + file.size,
-        'Content-Disposition': 'attachment; filename="' + encodeURI(file.name) + '"'
+        'Content-Range': 'bytes */' + self.file.size,
+        'Content-Disposition': 'attachment; filename="' + encodeURI(self.file.name) + '"'
       }
     };
 
@@ -93,23 +93,25 @@
         self._emitFail('Could not post to file resource: ' + textStatus);
       })
       .done(function(data, textStatus, jqXHR) {
+        var url;
         if (!(url = jqXHR.getResponseHeader('Location'))) {
           return self._emitFail('Could not get url for file resource: ' + textStatus);
         }
 
-        self._uploadFile(url, 0, file.size - 1);
+        self.fileUrl = url;
+        self._uploadFile(0, self.file.size - 1);
       });
   };
 
-  ResumableUpload.prototype._head = function(url, cb) {
+  ResumableUpload.prototype._head = function() {
     var self    = this;
     var options = {
       type: 'HEAD',
-      url: url,
+      url: this.fileUrl,
       cache: false
     };
 
-    console.log('Resuming known url ' + url);
+    console.log('Resuming known url ' + this.fileUrl);
 
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
@@ -126,12 +128,12 @@
           bytesWritten = parseInt(m[1], 10) + 1;
         }
 
-        self._uploadFile(url, bytesWritten, self.file.size - 1);
+        self._uploadFile(bytesWritten, self.file.size - 1);
       });
   };
 
   // Uploads the file data to tus resource url created by _start()
-  ResumableUpload.prototype._uploadFile = function(url, range_from, range_to) {
+  ResumableUpload.prototype._uploadFile = function(range_from, range_to) {
     var self  = this;
     this.bytesWritten = range_from;
 
@@ -142,7 +144,7 @@
       return this._emitDone();
     }
 
-    this._urlCache(url);
+    this._urlCache(self.fileUrl);
     this._emitProgress();
 
     var bytesWrittenAtStart = this.bytesWritten;
@@ -153,7 +155,7 @@
 
     var options = {
       type: 'PUT',
-      url: url,
+      url: self.fileUrl,
       data: blob,
       processData: false,
       contentType: self.file.type,
@@ -180,7 +182,7 @@
         self._emitFail(msg);
       })
       .done(function() {
-        console.log('done', arguments, self, url);
+        console.log('done', arguments, self, self.fileUrl);
 
         if (self.options.resetAfter === true) {
           self._urlCache(false);
