@@ -40,6 +40,7 @@
 
       // @TODO: second option: resumable: true/false
       // false -> removes resume functionality
+      resumable: options.resumable !== undefined ? options.resetBefore : true,
       resetBefore: options.resetBefore,
       resetAfter: options.resetAfter
     };
@@ -65,7 +66,7 @@
     var self = this;
 
     // Optionally resetBefore
-    if (self.options.resetBefore === true) {
+    if (!self.options.resumable || self.options.resetBefore === true) {
       self._urlCache(false);
     }
 
