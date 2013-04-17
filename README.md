@@ -30,7 +30,7 @@ $('input[type=file]').change(function() {
 ## Try the demo
 
 Without installing anything, you can testdrive over at the
-[tus.io](www.tus.io/demo.html) website.
+[tus.io](http://www.tus.io/demo.html) website.
 
 But for local development, here's how to run the repo-included demo:
 
