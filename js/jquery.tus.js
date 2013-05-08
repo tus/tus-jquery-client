@@ -155,7 +155,7 @@
     var xhr   = $.ajaxSettings.xhr();
 
     var options = {
-      type: 'PUT',
+      type: 'PATCH',
       url: self.fileUrl,
       data: blob,
       processData: false,
@@ -165,7 +165,7 @@
         return xhr;
       },
       headers: {
-        'Content-Range': 'bytes ' + range_from + '-' + range_to  + '/' + self.file.size
+        'Offset': range_from
       }
     };
 
