@@ -83,20 +83,20 @@
       type: 'POST',
       url: self.options.endpoint,
       headers: {
-        'Content-Range': 'bytes */' + self.file.size,
-        'Content-Disposition': 'attachment; filename="' + encodeURI(self.file.name) + '"'
+        'Final-Length': self.file.size,
       }
     };
 
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
         // @todo: Implement retry support
-        self._emitFail('Could not post to file resource: ' + textStatus);
+        self._emitFail('Could not post to file resource '
+          + self.options.endpoint + '. ' + textStatus);
       })
       .done(function(data, textStatus, jqXHR) {
         var location = jqXHR.getResponseHeader('Location');
         if (!location) {
-          return self._emitFail('Could not get url for file resource: ' + textStatus);
+          return self._emitFail('Could not get url for file resource. ' + textStatus);
         }
 
         self.fileUrl = location;
