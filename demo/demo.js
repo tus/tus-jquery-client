@@ -18,7 +18,7 @@ $(function() {
     $('.js-stop').removeClass('disabled');
 
     var options = {
-      endpoint: 'http://localhost:1080/files',
+      endpoint: 'http://localhost:1080/files/',
       resetBefore: $('#reset_before').prop('checked'),
       resetAfter: false
     };

@@ -83,20 +83,20 @@
       type: 'POST',
       url: self.options.endpoint,
       headers: {
-        'Content-Range': 'bytes */' + self.file.size,
-        'Content-Disposition': 'attachment; filename="' + encodeURI(self.file.name) + '"'
+        'Final-Length': self.file.size
       }
     };
 
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
         // @todo: Implement retry support
-        self._emitFail('Could not post to file resource: ' + textStatus);
+        self._emitFail('Could not post to file resource ' +
+          self.options.endpoint + '. ' + textStatus);
       })
       .done(function(data, textStatus, jqXHR) {
         var location = jqXHR.getResponseHeader('Location');
         if (!location) {
-          return self._emitFail('Could not get url for file resource: ' + textStatus);
+          return self._emitFail('Could not get url for file resource. ' + textStatus);
         }
 
         self.fileUrl = location;
@@ -113,22 +113,14 @@
     };
 
     console.log('Resuming known url ' + this.fileUrl);
-
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
         // @TODO: Implement retry support
         self._emitFail('Could not head at file resource: ' + textStatus);
       })
       .done(function(data, textStatus, jqXHR) {
-        var range = jqXHR.getResponseHeader('Range');
-        var m     = range && range.match(/bytes=\d+-(\d+)/);
-        var bytesWritten = 0;
-        if (m) {
-          // If the server has not received anything so far,
-          // there will be no Range header present.
-          bytesWritten = parseInt(m[1], 10) + 1;
-        }
-
+        var offset = jqXHR.getResponseHeader('Offset');
+        var bytesWritten = offset ? parseInt(offset, 10) : 0;
         self._uploadFile(bytesWritten, self.file.size - 1);
       });
   };
@@ -155,7 +147,7 @@
     var xhr   = $.ajaxSettings.xhr();
 
     var options = {
-      type: 'PUT',
+      type: 'PATCH',
       url: self.fileUrl,
       data: blob,
       processData: false,
@@ -165,7 +157,7 @@
         return xhr;
       },
       headers: {
-        'Content-Range': 'bytes ' + range_from + '-' + range_to  + '/' + self.file.size
+        'Offset': range_from
       }
     };
 
@@ -223,7 +215,14 @@
     }
 
     if (url) {
-      return localStorage.setItem(fingerPrint, url);
+      var result = false;
+      try {
+        result = localStorage.setItem(fingerPrint, url);
+      } catch (e) {
+        // most likely quota exceeded error
+      }
+
+      return result;
     }
 
     return localStorage.getItem(fingerPrint);
