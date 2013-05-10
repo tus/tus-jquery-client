@@ -83,15 +83,15 @@
       type: 'POST',
       url: self.options.endpoint,
       headers: {
-        'Final-Length': self.file.size,
+        'Final-Length': self.file.size
       }
     };
 
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
         // @todo: Implement retry support
-        self._emitFail('Could not post to file resource '
-          + self.options.endpoint + '. ' + textStatus);
+        self._emitFail('Could not post to file resource ' +
+          self.options.endpoint + '. ' + textStatus);
       })
       .done(function(data, textStatus, jqXHR) {
         var location = jqXHR.getResponseHeader('Location');
@@ -223,7 +223,14 @@
     }
 
     if (url) {
-      return localStorage.setItem(fingerPrint, url);
+      var result = false;
+      try {
+        result = localStorage.setItem(fingerPrint, url);
+      } catch (e) {
+        // most likely quota exceeded error
+      }
+
+      return result;
     }
 
     return localStorage.getItem(fingerPrint);
