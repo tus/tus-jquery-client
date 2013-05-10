@@ -113,22 +113,14 @@
     };
 
     console.log('Resuming known url ' + this.fileUrl);
-
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
         // @TODO: Implement retry support
         self._emitFail('Could not head at file resource: ' + textStatus);
       })
       .done(function(data, textStatus, jqXHR) {
-        var range = jqXHR.getResponseHeader('Range');
-        var m     = range && range.match(/bytes=\d+-(\d+)/);
-        var bytesWritten = 0;
-        if (m) {
-          // If the server has not received anything so far,
-          // there will be no Range header present.
-          bytesWritten = parseInt(m[1], 10) + 1;
-        }
-
+        var offset = jqXHR.getResponseHeader('Offset');
+        var bytesWritten = offset ? parseInt(offset, 10) : 0;
         self._uploadFile(bytesWritten, self.file.size - 1);
       });
   };
