@@ -157,7 +157,8 @@
         return xhr;
       },
       headers: {
-        'Offset': range_from
+        'Offset': range_from,
+        'Content-Type': 'application/offset+octet-stream'
       }
     };
 
