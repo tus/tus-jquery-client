@@ -12,17 +12,23 @@ The code below outlines how the API could work.
 
 ```js
 $('input[type=file]').change(function() {
-  var options = {url: 'http://localhost:1080/files'};
+  var options = { endpoint: 'http://localhost:1080/files' };
+  var input   = $(this);
+
   tus
     .upload(this.files[0], options)
-    .fail(function(upload, error) {
+    .fail(function(error) {
       console.log('upload failed', error);
     })
-    .progress(function(upload) {
-      console.log(upload.bytesSent, upload.bytesTotal);
+    .always(function() {
+       input.val('');
     })
-    .done(function(upload) {
-      console.log(upload.url);
+    .progress(function(e, bytesUploaded, bytesTotal) {
+       console.log(bytesUploaded, bytesTotal);
+    })
+    .done(function(url, file) {
+      console.log(url);
+      console.log(file.name);
     });
 });
 ```
