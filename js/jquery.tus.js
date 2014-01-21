@@ -42,7 +42,8 @@
       // false -> removes resume functionality
       resumable: options.resumable !== undefined ? options.resetBefore : true,
       resetBefore: options.resetBefore,
-      resetAfter: options.resetAfter
+      resetAfter: options.resetAfter,
+      headers: options.headers !== undefined ? options.headers : {}
     };
 
     // The url of the uploaded file, assigned by the tus upload endpoint
@@ -79,12 +80,14 @@
 
   ResumableUpload.prototype._post = function() {
     var self    = this;
+    var headers = $.extend({
+      'Final-Length': self.file.size
+    }, self.options.headers);
+
     var options = {
       type: 'POST',
       url: self.options.endpoint,
-      headers: {
-        'Final-Length': self.file.size
-      }
+      headers: headers
     };
 
     $.ajax(options)
@@ -109,7 +112,8 @@
     var options = {
       type: 'HEAD',
       url: this.fileUrl,
-      cache: false
+      cache: false,
+      headers: self.options.headers
     };
 
     console.log('Resuming known url ' + this.fileUrl);
@@ -152,6 +156,11 @@
     var blob  = slice.call(self.file, range_from, range_to + 1, self.file.type);
     var xhr   = $.ajaxSettings.xhr();
 
+    var headers = $.extend({
+      'Offset': range_from,
+      'Content-Type': 'application/offset+octet-stream'
+    }, self.options.headers);
+
     var options = {
       type: 'PATCH',
       url: self.fileUrl,
@@ -162,10 +171,7 @@
       xhr: function() {
         return xhr;
       },
-      headers: {
-        'Offset': range_from,
-        'Content-Type': 'application/offset+octet-stream'
-      }
+      headers: headers
     };
 
     $(xhr.upload).bind('progress', function(e) {
