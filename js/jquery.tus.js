@@ -116,7 +116,13 @@
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
         // @TODO: Implement retry support
-        self._emitFail('Could not head at file resource: ' + textStatus);
+        if(jqXHR.status == 404){
+          // not valid, not on server, start with post request and restart
+          // upload
+          self._post();
+        }else{
+          self._emitFail('Could not head at file resource: ' + textStatus);
+        }
       })
       .done(function(data, textStatus, jqXHR) {
         var offset = jqXHR.getResponseHeader('Offset');
