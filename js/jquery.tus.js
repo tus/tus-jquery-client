@@ -43,7 +43,8 @@
       resumable: options.resumable !== undefined ? options.resetBefore : true,
       resetBefore: options.resetBefore,
       resetAfter: options.resetAfter,
-      headers: options.headers !== undefined ? options.headers : {}
+      headers: options.headers !== undefined ? options.headers : {},
+      chunkSize: options.chunkSize
     };
 
     // The url of the uploaded file, assigned by the tus upload endpoint
@@ -103,7 +104,7 @@
         }
 
         self.fileUrl = location;
-        self._uploadFile(0, self.file.size - 1);
+        self._uploadFile(0);
       });
   };
 
@@ -131,12 +132,12 @@
       .done(function(data, textStatus, jqXHR) {
         var offset = jqXHR.getResponseHeader('Offset');
         var bytesWritten = offset ? parseInt(offset, 10) : 0;
-        self._uploadFile(bytesWritten, self.file.size - 1);
+        self._uploadFile(bytesWritten);
       });
   };
 
   // Uploads the file data to tus resource url created by _start()
-  ResumableUpload.prototype._uploadFile = function(range_from, range_to) {
+  ResumableUpload.prototype._uploadFile = function(range_from) {
     var self  = this;
     this.bytesWritten = range_from;
 
@@ -152,8 +153,13 @@
 
     var bytesWrittenAtStart = this.bytesWritten;
 
+    var range_to = self.file.size;
+    if(self.options.chunkSize){
+      range_to = Math.min(range_to, range_from + self.options.chunkSize);
+    }
+
     var slice = self.file.slice || self.file.webkitSlice || self.file.mozSlice;
-    var blob  = slice.call(self.file, range_from, range_to + 1, self.file.type);
+    var blob  = slice.call(self.file, range_from, range_to, self.file.type);
     var xhr   = $.ajaxSettings.xhr();
 
     var headers = $.extend({
@@ -188,13 +194,18 @@
         self._emitFail(msg);
       })
       .done(function() {
-        console.log('done', arguments, self, self.fileUrl);
+        if(range_to === self.file.size){
+          console.log('done', arguments, self, self.fileUrl);
 
-        if (self.options.resetAfter === true) {
-          self._urlCache(false);
+          if (self.options.resetAfter === true) {
+            self._urlCache(false);
+          }
+
+          self._emitDone();
+        }else{
+          // still have more to upload
+          self._uploadFile(range_to);
         }
-
-        self._emitDone();
       });
   };
 
