@@ -42,7 +42,9 @@
       // false -> removes resume functionality
       resumable: options.resumable !== undefined ? options.resetBefore : true,
       resetBefore: options.resetBefore,
-      resetAfter: options.resetAfter
+      resetAfter: options.resetAfter,
+      headers: options.headers !== undefined ? options.headers : {},
+      chunkSize: options.chunkSize
     };
 
     // The url of the uploaded file, assigned by the tus upload endpoint
@@ -79,12 +81,14 @@
 
   ResumableUpload.prototype._post = function() {
     var self    = this;
+    var headers = $.extend({
+      'Final-Length': self.file.size
+    }, self.options.headers);
+
     var options = {
       type: 'POST',
       url: self.options.endpoint,
-      headers: {
-        'Final-Length': self.file.size
-      }
+      headers: headers
     };
 
     $.ajax(options)
@@ -100,7 +104,7 @@
         }
 
         self.fileUrl = location;
-        self._uploadFile(0, self.file.size - 1);
+        self._uploadFile(0);
       });
   };
 
@@ -109,24 +113,31 @@
     var options = {
       type: 'HEAD',
       url: this.fileUrl,
-      cache: false
+      cache: false,
+      headers: self.options.headers
     };
 
     console.log('Resuming known url ' + this.fileUrl);
     $.ajax(options)
       .fail(function(jqXHR, textStatus, errorThrown) {
         // @TODO: Implement retry support
-        self._emitFail('Could not head at file resource: ' + textStatus);
+        if(jqXHR.status == 404){
+          // not valid, not on server, start with post request and restart
+          // upload
+          self._post();
+        }else{
+          self._emitFail('Could not head at file resource: ' + textStatus);
+        }
       })
       .done(function(data, textStatus, jqXHR) {
         var offset = jqXHR.getResponseHeader('Offset');
         var bytesWritten = offset ? parseInt(offset, 10) : 0;
-        self._uploadFile(bytesWritten, self.file.size - 1);
+        self._uploadFile(bytesWritten);
       });
   };
 
   // Uploads the file data to tus resource url created by _start()
-  ResumableUpload.prototype._uploadFile = function(range_from, range_to) {
+  ResumableUpload.prototype._uploadFile = function(range_from) {
     var self  = this;
     this.bytesWritten = range_from;
 
@@ -142,9 +153,19 @@
 
     var bytesWrittenAtStart = this.bytesWritten;
 
+    var range_to = self.file.size;
+    if(self.options.chunkSize){
+      range_to = Math.min(range_to, range_from + self.options.chunkSize);
+    }
+
     var slice = self.file.slice || self.file.webkitSlice || self.file.mozSlice;
-    var blob  = slice.call(self.file, range_from, range_to + 1, self.file.type);
+    var blob  = slice.call(self.file, range_from, range_to, self.file.type);
     var xhr   = $.ajaxSettings.xhr();
+
+    var headers = $.extend({
+      'Offset': range_from,
+      'Content-Type': 'application/offset+octet-stream'
+    }, self.options.headers);
 
     var options = {
       type: 'PATCH',
@@ -156,10 +177,7 @@
       xhr: function() {
         return xhr;
       },
-      headers: {
-        'Offset': range_from,
-        'Content-Type': 'application/offset+octet-stream'
-      }
+      headers: headers
     };
 
     $(xhr.upload).bind('progress', function(e) {
@@ -176,13 +194,18 @@
         self._emitFail(msg);
       })
       .done(function() {
-        console.log('done', arguments, self, self.fileUrl);
+        if(range_to === self.file.size){
+          console.log('done', arguments, self, self.fileUrl);
 
-        if (self.options.resetAfter === true) {
-          self._urlCache(false);
+          if (self.options.resetAfter === true) {
+            self._urlCache(false);
+          }
+
+          self._emitDone();
+        }else{
+          // still have more to upload
+          self._uploadFile(range_to);
         }
-
-        self._emitDone();
       });
   };
 
