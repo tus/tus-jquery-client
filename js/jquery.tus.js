@@ -12,6 +12,16 @@
 (function ($) {
   'use strict';
 
+  // taken from https://github.com/23/resumable.js/blob/master/resumable.js
+  var support = ((typeof(File) !== 'undefined') && (typeof(Blob) !== 'undefined') &&
+                 (typeof(FileList)!=='undefined') &&
+                 (!!Blob.prototype.webkitSlice || !!Blob.prototype.mozSlice || !!Blob.prototype.slice || false)
+                );
+  if(!support){
+    // not supported in browser
+    return;
+  }
+
   // The Public API
   var tus = window.tus = {
     upload: function(file, options) {
