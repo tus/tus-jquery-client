@@ -1,4 +1,5 @@
 # tus-jquery-client
+[![Build Status](https://travis-ci.org/tus/tus-jquery-client.svg?branch=master)](https://travis-ci.org/tus/tus-jquery-client)
 
 A jQuery client implementing the [tus resumable upload
 protocol](https://github.com/tus/tus-resumable-upload-protocol).
