@@ -109,6 +109,11 @@
       })
       .done(function(data, textStatus, jqXHR) {
         var location = jqXHR.getResponseHeader('Location');
+
+        if (self.options.endpoint.indexOf("https") == 0) {
+          location = location.replace('http', 'https');
+        }
+
         if (!location) {
           return self._emitFail('Could not get url for file resource. ' + textStatus);
         }
