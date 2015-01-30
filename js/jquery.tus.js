@@ -57,6 +57,9 @@
       chunkSize: options.chunkSize
     };
 
+    // Add tus version to headers
+    this.options.headers["TUS-Resumable"] = "1.0.0";
+
     // The url of the uploaded file, assigned by the tus upload endpoint
     this.fileUrl = null;
 
