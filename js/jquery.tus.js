@@ -54,7 +54,10 @@
       resetBefore: options.resetBefore,
       resetAfter: options.resetAfter,
       headers: options.headers !== undefined ? options.headers : {},
-      chunkSize: options.chunkSize
+      chunkSize: options.chunkSize,
+
+      // Optional metadata about the uploading file
+      metadata: options.metadata || {}
     };
 
     // Add tus version to headers
@@ -97,6 +100,11 @@
     var headers = $.extend({
       'Entity-Length': self.file.size
     }, self.options.headers);
+
+    var metadataHeader = this._generateMetadata();
+    if (metadataHeader.length > 0) {
+      headers["Metadata"] = metadataHeader;
+    }
 
     var options = {
       type: 'POST',
@@ -263,5 +271,18 @@
     }
 
     return localStorage.getItem(fingerPrint);
+  };
+
+  ResumableUpload.prototype._generateMetadata = function() {
+    var elements = [];
+    var metadata = this.options.metadata;
+
+    for (var key in metadata) {
+      if (metadata.hasOwnProperty(key)) {
+        elements.push(key + " " + btoa(metadata[key]));
+      }
+    }
+
+    return elements.join(",");
   };
 })(jQuery);
