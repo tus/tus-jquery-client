@@ -2,7 +2,7 @@
  * tus-jquery-client
  * https://github.com/tus/tus-jquery-client
  *
- * Copyright (c) 2013 Transloadit Ltd and Contributors
+ * Copyright (c) 2013-2015 Transloadit Ltd and Contributors
  * http://tus.io/
  *
  * Licensed under the MIT license:
