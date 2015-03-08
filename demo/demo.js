@@ -20,7 +20,11 @@ $(function() {
     var options = {
       endpoint: 'http://localhost:1080/files/',
       resetBefore: $('#reset_before').prop('checked'),
-      resetAfter: false
+      resetAfter: false,
+      metadata: {
+        name: file.name,
+        type: file.type
+      }
     };
 
     $('.progress').addClass('active');
