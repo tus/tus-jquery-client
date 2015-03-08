@@ -9,7 +9,13 @@
  * http://www.opensource.org/licenses/MIT
  */
 
-(function ($) {
+(function (factory) {
+  if(typeof module === "object" && typeof module.exports === "object") {
+    module.exports = factory(require("jquery"), window, document);
+  } else {
+    window.tus = factory(jQuery, window, document);
+  }
+}(function($, window, document, undefined) {
   'use strict';
 
   // taken from https://github.com/23/resumable.js/blob/master/resumable.js
@@ -23,7 +29,7 @@
   }
 
   // The Public API
-  var tus = window.tus = {
+  var tus = {
     upload: function(file, options) {
       var upload = new ResumableUpload(file, options);
       if (file) {
@@ -285,4 +291,6 @@
 
     return elements.join(",");
   };
-})(jQuery);
+
+  return tus;
+}));
