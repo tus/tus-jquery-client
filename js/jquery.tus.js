@@ -103,7 +103,7 @@
 
     var metadataHeader = this._generateMetadata();
     if (metadataHeader.length > 0) {
-      headers["Metadata"] = metadataHeader;
+      headers.Metadata = metadataHeader;
     }
 
     var options = {
