@@ -67,7 +67,7 @@
     };
 
     // Add tus version to headers
-    this.options.headers["TUS-Resumable"] = "1.0.0";
+    this.options.headers["Tus-Resumable"] = "1.0.0";
 
     // The url of the uploaded file, assigned by the tus upload endpoint
     this.fileUrl = null;
@@ -104,12 +104,12 @@
   ResumableUpload.prototype._post = function() {
     var self    = this;
     var headers = $.extend({
-      'Entity-Length': self.file.size
+      'Upload-Length': self.file.size
     }, self.options.headers);
 
     var metadataHeader = this._generateMetadata();
     if (metadataHeader.length > 0) {
-      headers.Metadata = metadataHeader;
+      headers['Upload-Metadata'] = metadataHeader;
     }
 
     var options = {
@@ -157,7 +157,7 @@
         }
       })
       .done(function(data, textStatus, jqXHR) {
-        var offset = jqXHR.getResponseHeader('Offset');
+        var offset = jqXHR.getResponseHeader('Upload-Offset');
         var bytesWritten = offset ? parseInt(offset, 10) : 0;
         self._uploadFile(bytesWritten);
       });
@@ -190,7 +190,7 @@
     var xhr   = $.ajaxSettings.xhr();
 
     var headers = $.extend({
-      'Offset': range_from,
+      'Upload-Offset': range_from,
       'Content-Type': 'application/offset+octet-stream'
     }, self.options.headers);
 
