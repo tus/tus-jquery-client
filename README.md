@@ -3,6 +3,8 @@
 
 A jQuery client implementing the [tus resumable upload
 protocol](https://github.com/tus/tus-resumable-upload-protocol).
+If you looking for a browser client without the need of jQuery, you
+may enjoy [tus-js-client](https://github.com/tus/tus-js-client).
 
 This first version will provide a low level API without a GUI. More advanced
 features will follow.
