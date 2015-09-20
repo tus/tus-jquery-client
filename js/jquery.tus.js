@@ -2,14 +2,20 @@
  * tus-jquery-client
  * https://github.com/tus/tus-jquery-client
  *
- * Copyright (c) 2013 Transloadit Ltd and Contributors
+ * Copyright (c) 2013-2015 Transloadit Ltd and Contributors
  * http://tus.io/
  *
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
 
-(function ($) {
+(function (factory) {
+  if(typeof module === "object" && typeof module.exports === "object") {
+    module.exports = factory(require("jquery"), window, document);
+  } else {
+    window.tus = factory(jQuery, window, document);
+  }
+}(function($, window, document, undefined) {
   'use strict';
 
   // taken from https://github.com/23/resumable.js/blob/master/resumable.js
@@ -23,7 +29,7 @@
   }
 
   // The Public API
-  var tus = window.tus = {
+  var tus = {
     upload: function(file, options) {
       var upload = new ResumableUpload(file, options);
       if (file) {
@@ -54,8 +60,14 @@
       resetBefore: options.resetBefore,
       resetAfter: options.resetAfter,
       headers: options.headers !== undefined ? options.headers : {},
-      chunkSize: options.chunkSize
+      chunkSize: options.chunkSize,
+
+      // Optional metadata about the uploading file
+      metadata: options.metadata || {}
     };
+
+    // Add tus version to headers
+    this.options.headers["Tus-Resumable"] = "1.0.0";
 
     // The url of the uploaded file, assigned by the tus upload endpoint
     this.fileUrl = null;
@@ -92,8 +104,13 @@
   ResumableUpload.prototype._post = function() {
     var self    = this;
     var headers = $.extend({
-      'Final-Length': self.file.size
+      'Upload-Length': self.file.size
     }, self.options.headers);
+
+    var metadataHeader = this._generateMetadata();
+    if (metadataHeader.length > 0) {
+      headers['Upload-Metadata'] = metadataHeader;
+    }
 
     var options = {
       type: 'POST',
@@ -140,7 +157,7 @@
         }
       })
       .done(function(data, textStatus, jqXHR) {
-        var offset = jqXHR.getResponseHeader('Offset');
+        var offset = jqXHR.getResponseHeader('Upload-Offset');
         var bytesWritten = offset ? parseInt(offset, 10) : 0;
         self._uploadFile(bytesWritten);
       });
@@ -173,7 +190,7 @@
     var xhr   = $.ajaxSettings.xhr();
 
     var headers = $.extend({
-      'Offset': range_from,
+      'Upload-Offset': range_from,
       'Content-Type': 'application/offset+octet-stream'
     }, self.options.headers);
 
@@ -261,4 +278,19 @@
 
     return localStorage.getItem(fingerPrint);
   };
-})(jQuery);
+
+  ResumableUpload.prototype._generateMetadata = function() {
+    var elements = [];
+    var metadata = this.options.metadata;
+
+    for (var key in metadata) {
+      if (metadata.hasOwnProperty(key)) {
+        elements.push(key + " " + btoa(metadata[key]));
+      }
+    }
+
+    return elements.join(",");
+  };
+
+  return tus;
+}));
