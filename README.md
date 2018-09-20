@@ -1,13 +1,17 @@
-# tus-jquery-client
+# WARNING: Deprecated Project
+
+tus-jquery-client is not maintained anymore and no support is available.
+Please use [tus-js-client](https://github.com/tus/tus-js-client) for a modern
+tus client for browsers. More implementations for different environments can
+be found on [tus.io](https://tus.io/implementations.html).
+
+## tus-jquery-client
 [![Build Status](https://travis-ci.org/tus/tus-jquery-client.svg?branch=master)](https://travis-ci.org/tus/tus-jquery-client)
 
 A jQuery client implementing the [tus resumable upload
 protocol](https://github.com/tus/tus-resumable-upload-protocol).
 If you looking for a browser client without the need of jQuery, you
 may enjoy [tus-js-client](https://github.com/tus/tus-js-client).
-
-This first version will provide a low level API without a GUI. More advanced
-features will follow.
 
 ## Example
 
